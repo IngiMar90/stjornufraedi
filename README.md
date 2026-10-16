@@ -4,8 +4,8 @@ Gagnvirkt íslenskt kennsluforrit fyrir grunnskóla. Keyrir sem venjulegur vefur
 
 ## Efni
 
-- **Plánetubók:** upplýsingar um átta plánetur, röð, stærð, meðal­fjarlægð frá sólu, umferðartíma og einkenni. Hlekkir á frumheimildir NASA.
-- **Raðaðu plánetunum:** velja plánetu og sæti, eða draga og sleppa. Röðun má leysa með lyklaborði og á snertiskjá.
+- **Plánetubók:** upplýsingar um átta plánetur, röð, stærð, meðal­fjarlægð frá sólu, umferðartíma og einkenni. Stutt grunnsýn og valfrjáls **Nánar** lestur á íslensku fyrir hverja plánetu. Ítartextar í `planet-details.js` eru sjálfstæðar samantektir á einföldu máli með heimildarhlekk á NASA. Hægt er að lesa ítartextann sérstaklega upp.
+- **Raðaðu plánetunum:** sól vinstra megin og átta sporbrautir með merktum lendingarpunktum. Draga og sleppa með mús, snertingu eða penna; einnig má velja plánetu og lendingarpunkt með hnöppum eða lyklaborði. Allar átta sporbrautirnar sjást, en aðeins fyrstu 4/6/8 eru virkar eftir stigi. Á litlum skjá má fletta myndinni til hliðar.
 - **Hvaða pláneta er þetta?** Greina plánetu á geimmynd. Heitið kemur ekki fram á myndinni í spurningunni.
 - **Geimspæjarinn:** lesskilningur og ályktun út frá vísbendingum.
 - **Plánetufjölskyldur:** bergplánetur og risaplánetur á stigi 1; bergplánetur, gasrisar og ísrisar á stigum 2–3.

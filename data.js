@@ -42,7 +42,7 @@ export const LEVELS = [
 export const ACTIVITIES = [
   { id: 'order', icon: '↔', color: 'mint', title: 'Raðaðu plánetunum', text: 'Hver kemur fyrst? Byggðu sólkerfið frá sólinni og út.', skill: 'Röð og fjarlægð',
     lesson: 'Pláneturnar átta ganga um sólina. Röðin frá sólinni er Merkúríus, Venus, Jörðin, Mars, Júpíter, Satúrnus, Úranus og Neptúnus.',
-    example: 'Merkúríus er næst sólinni. Hún fer því í fyrsta sætið.', task: 'Veldu plánetu og svo sætið hennar. Þú getur líka dregið plánetu í sæti. Veldu skipað sæti til að taka plánetuna úr því.' },
+    example: 'Merkúríus er næst sólinni. Hún fer því á sporbraut 1.', task: 'Dragðu plánetu á punkt á réttri sporbraut. Þú getur líka valið plánetu og síðan punkt. Veldu plánetu á sporbraut til að taka hana úr.' },
   { id: 'identify', icon: '◎', color: 'peach', title: 'Hvaða pláneta er þetta?', text: 'Skoðaðu myndina og finndu rétta nafnið.', skill: 'Myndir og heiti',
     lesson: 'Plánetur líta ólíkt út. Jörðin hefur höf og lönd, Mars er rauðleitur og Satúrnus hefur áberandi hringa. Myndirnar eru teknar úr geimnum. Litir og lýsing geta verið ólík milli mynda.',
     example: 'Mynd af plánetu með bláum höfum, löndum og hvítum skýjum sýnir jörðina.', task: 'Skoðaðu myndina og veldu rétt heiti. Bókstafirnir hjálpa þér að finna svarmöguleikana.' },

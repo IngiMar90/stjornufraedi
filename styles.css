@@ -34,4 +34,43 @@ body{background:#030a18 url('./assets/starfield.svg') center top / 1600px 1150px
 @media(max-width:1050px){.hero-saturn{left:57%;top:24%}.hero-saturn .planet-art{--size:165px!important}}
 @media(max-width:780px){.hero-saturn{left:51%;top:33%}.hero-saturn .planet-art{--size:145px!important}}
 @media(max-width:540px){.hero-saturn{left:57%;top:9%}.hero-saturn .planet-art{--size:145px!important}}
+/* Orbit placement scene: the Sun is the shared left focus of eight ellipses. */
+.orbit-panel{max-width:none;padding:28px}.orbit-panel .order-help{margin:18px 0 22px;max-width:900px}
+.orbit-scroll{overflow-x:auto;overflow-y:hidden;border:1px solid #40556d;border-radius:22px;background:#030a18;scrollbar-color:#85d8c5 #152539;scrollbar-width:thin;max-width:100%;overscroll-behavior-x:contain}
+.orbit-scroll:focus-visible{outline:3px solid var(--peach);outline-offset:4px}
+.orbit-board{position:relative;min-width:900px;width:100%;aspect-ratio:1000/560;background:radial-gradient(ellipse at 13% 50%,#e9ab3019,transparent 38%),url('./assets/starfield.svg') center/1000px auto;isolation:isolate}
+.orbit-board-title{position:absolute;left:23px;top:16px;z-index:1;color:#c4d6e7;font-size:11px;letter-spacing:.18em;background:#071020cc;padding:6px 11px;border-radius:8px}
+.orbit-lines{position:absolute;inset:0;width:100%;height:100%;overflow:hidden}
+.orbit-line{fill:none;stroke:#9fb8d151;stroke-width:1.4;vector-effect:non-scaling-stroke;transition:stroke .15s,stroke-width .15s}
+.orbit-line.later-orbit{stroke:#77899b29;stroke-dasharray:5 7}.orbit-line.is-over{stroke:var(--mint);stroke-width:3}
+.orbit-sun{position:absolute;left:8.5%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;flex-direction:column;gap:13px;z-index:1}
+.orbit-sun strong{position:absolute;top:100%;margin-top:13px;font-size:16px;color:#ffe0a4;background:#191b21ba;padding:3px 13px;border-radius:20px}
+.orbit-sun .sun{box-shadow:0 0 35px #ffc15d70,0 0 90px #f9a34c33}
+.orbit-drop.order-slot{position:absolute;transform:translate(-50%,-50%);width:88px;height:88px;min-height:88px;border:1px dashed #8be4cda1;border-radius:50%;background:#071323dd;z-index:2;gap:5px;padding:7px;font-size:14px;box-shadow:0 0 0 5px #0713234d;transition:background .15s,border-color .15s,box-shadow .15s}
+.orbit-drop .slot-number{top:-10px;left:-5px;width:25px;height:25px;border-radius:50%;display:grid;place-items:center;background:#233c50;border:1px solid #8bb6c3;color:#ebf7ff;font-size:12px;font-weight:700}
+.orbit-drop .landing-dot{display:block;width:12px;height:12px;border-radius:50%;background:var(--mint);box-shadow:0 0 15px #8be4cd66}
+.orbit-drop small{font-size:10px;color:#bfd8e3}.orbit-drop strong{font-size:11px;color:var(--text);font-weight:600;line-height:1.1;background:#071323cc;border-radius:5px;padding:3px 6px;white-space:nowrap}
+.orbit-drop.occupied{background:#0d1e34ed;border-style:solid;border-color:#7598b5}.orbit-drop.occupied .planet-art{flex-shrink:0}
+.orbit-drop:hover:not(:disabled),.orbit-drop.is-over{border-style:solid;border-color:var(--mint);background:#183e42;box-shadow:0 0 0 6px #8be4cd25,0 0 30px #8be4cd30}
+.orbit-drop.slot-right{border:2px solid var(--mint);background:#16352f}.orbit-drop.slot-wrong{border:2px dashed var(--rose);background:#352130}
+.orbit-drop.slot-right:after,.orbit-drop.slot-wrong:after{right:-5px;top:-10px;font-size:16px;background:#132536;border-radius:50%;width:23px;height:23px;text-align:center}
+.orbit-drop.later-slot{opacity:.38;border-color:#697c92;box-shadow:none}.later-slot .landing-dot{background:#8593a5;box-shadow:none}
+.orbit-scroll-hint{font-size:.74em;color:var(--muted);margin:10px 0 0}
+.planet-bank-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-top:25px}.planet-bank-heading h2{font-size:1.1em;letter-spacing:-.02em}.planet-bank-heading>span{font-size:.73em;color:var(--muted)}
+.orbit-panel .planet-bank{grid-template-columns:repeat(8,minmax(0,1fr));gap:10px;margin:16px 0}
+.orbit-panel .bank-planet{touch-action:none;font-size:clamp(.75rem,1.1vw,.9rem);padding:17px 5px 12px;gap:11px;background:linear-gradient(150deg,#28445b,#16283f);border-radius:16px;border-width:1px}
+.orbit-panel .bank-planet.selected{border:2px solid var(--mint);padding:16px 4px 11px;background:#214945;box-shadow:0 0 0 3px #8be4cd18}
+.orbit-panel .bank-planet strong{max-width:100%;overflow-wrap:anywhere;line-height:1.3;text-align:center}
+.orbit-panel .bank-planet.is-dragging{opacity:.3}
+.drag-planet-ghost{position:fixed;transform:translate(-50%,-65%);z-index:1000;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:5px;background:#1b3f4bed;border:2px solid var(--mint);padding:14px;border-radius:20px;box-shadow:0 10px 40px #0008;color:#fff;font-size:12px}
+.planet-more{margin-top:27px;border-top:1px solid #3b506b;padding-top:21px}.planet-more>summary{display:flex;justify-content:space-between;align-items:center;gap:18px;list-style:none;background:#264b4c;color:#b2f2df;border:1px solid #6ba99d;border-radius:12px;padding:13px 17px;font-weight:650;cursor:pointer;font-size:.9em;min-height:52px}.planet-more>summary::-webkit-details-marker{display:none}
+.planet-more>summary:hover{background:#315d5b}.planet-more>summary:focus-visible{outline:3px solid var(--peach);outline-offset:4px}.more-chevron{font-size:1.3em;line-height:1;transition:transform .2s}.planet-more[open] .more-chevron{transform:rotate(180deg)}
+.planet-detail:has(.planet-more[open]) .planet-portrait{justify-content:flex-start;padding-top:65px}
+.planet-longread{padding:24px 0 5px}.longread-heading{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:22px}.longread-heading .read-btn{font-size:.7em;padding:10px 12px;min-height:44px}.planet-longread section+section{margin-top:27px}.planet-longread h3{font-size:1.12em;letter-spacing:-.02em;line-height:1.4;margin-bottom:11px}.planet-longread section p{font-size:.92em;line-height:1.9;color:#c8d5e5}.reading-source{font-size:.7em!important;line-height:1.8;margin-top:28px!important;padding-top:15px;border-top:1px solid var(--line)}
+@media(min-width:1100px){.orbit-scroll-hint{display:none}}
+@media(max-width:780px){.orbit-panel{padding:24px}.orbit-panel .planet-bank{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.planet-bank-heading{align-items:flex-start;flex-direction:column;gap:7px}}
+@media(max-width:540px){.orbit-panel{padding:23px 13px}.orbit-board{min-width:850px}.orbit-drop.order-slot{width:82px;height:82px;min-height:82px}.orbit-sun .sun{--size:76px!important}.orbit-panel .planet-bank{gap:7px}.orbit-panel .bank-planet .planet-art{--size:47px!important}.orbit-panel .bank-planet{font-size:11px}.planet-longread section p{font-size:1em}}
+.large-text .orbit-board{min-width:1050px}.large-text .orbit-drop.order-slot{font-size:18px;width:104px;min-height:104px;height:104px}.large-text .orbit-drop strong{font-size:14px}.large-text .orbit-drop small{font-size:12px}.large-text .orbit-panel .bank-planet{font-size:1em}
+@media(max-width:780px){.large-text .orbit-panel .planet-bank{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
 @media print{.topbar,.site-footer,.back,.tools,.game-actions,.button-row,.read-btn{display:none}body{background:#fff;color:#000}.panel,.planet-detail,.game-panel{background:#fff;border-color:#999}p,small,dd,dt,li{color:#222!important}main{padding:0;max-width:none}.planet-copy{padding:20px}.info-note{color:#111;background:#eee}.table-scroll{overflow:visible}}

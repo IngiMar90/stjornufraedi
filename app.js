@@ -1,3 +1,4 @@
+import { PLANET_DETAILS } from './planet-details.js';
 import { PLANET_IMAGES } from './imagery.js';
 import { PLANETS, TYPES, LEVELS, ACTIVITIES, STORAGE_KEY, shuffle, planet, orderPool, isDay, groupFor, makeQuestions, scoreStars, readProgress } from './data.js';
 
@@ -15,6 +16,8 @@ let run = null;
 let view = 'home';
 let noticeTimer;
 let focusBack;
+let pointerDrag = null;
+let suppressPointerClickUntil = 0;
 
 const fmt = n => new Intl.NumberFormat('is-IS').format(n);
 function notify(text) {
@@ -68,7 +71,7 @@ function solarStrip() {
 function atlas(id = 'earth') {
   run = null;
   const p = planet(id) || PLANETS[2];
-  mount(`${breadcrumb('PLÁNETUBÓK')}<div class="page-heading"><div><h1>Kynnumst plánetunum</h1><p>Veldu plánetu til að skoða hana nánar.</p></div>${readButton()}</div>${solarStrip()}<section class="planet-detail readable"><div class="planet-portrait">${art(p.id, 220, true)}<span class="portrait-tag">${p.tag}</span><a class="photo-credit" href="${PLANET_IMAGES[p.id].source}" target="_blank" rel="noopener">Mynd: ${PLANET_IMAGES[p.id].credit} ↗</a></div><div class="planet-copy"><span class="eyebrow">${p.order}. FRÁ SÓLINNI · ${TYPES[p.type]}</span><h2>${p.name}</h2><p class="intro-text">${p.intro}</p><dl class="fact-grid"><div><dt>Þvermál, um það bil</dt><dd>${fmt(p.diameter)} km</dd></div><div><dt>Einn hringur um sólina</dt><dd>${p.year}</dd></div><div><dt>Meðalfjarlægð frá sólu</dt><dd>${p.distance}</dd></div></dl><ul class="fact-list">${p.facts.map(f => `<li>${f}</li>`).join('')}</ul><a href="${p.source}" target="_blank" rel="noopener" class="text-link">Nánar hjá NASA (enska) ↗</a></div></section><div class="info-note"><strong>Sólin er stjarna.</strong> Tunglið er fylgihnöttur jarðar. Plútó er dvergreikistjarna og telst ekki ein af átta plánetunum.</div><div class="button-row end-actions"><button class="primary" data-action="prep" data-id="identify">Prófaðu þekkinguna →</button><button class="secondary" data-action="home">Til baka í verkefni</button></div>`, 'atlas');
+  mount(`${breadcrumb('PLÁNETUBÓK')}<div class="page-heading"><div><h1>Kynnumst plánetunum</h1><p>Veldu plánetu til að skoða hana nánar.</p></div>${readButton()}</div>${solarStrip()}<section class="planet-detail readable"><div class="planet-portrait">${art(p.id, 220, true)}<span class="portrait-tag">${p.tag}</span><a class="photo-credit" href="${PLANET_IMAGES[p.id].source}" target="_blank" rel="noopener">Mynd: ${PLANET_IMAGES[p.id].credit} ↗</a></div><div class="planet-copy"><span class="eyebrow">${p.order}. FRÁ SÓLINNI · ${TYPES[p.type]}</span><h2>${p.name}</h2><p class="intro-text">${p.intro}</p><dl class="fact-grid"><div><dt>Þvermál, um það bil</dt><dd>${fmt(p.diameter)} km</dd></div><div><dt>Einn hringur um sólina</dt><dd>${p.year}</dd></div><div><dt>Meðalfjarlægð frá sólu</dt><dd>${p.distance}</dd></div></dl><ul class="fact-list">${p.facts.map(f => `<li>${f}</li>`).join('')}</ul><details class="planet-more"><summary><span class="more-label">Nánar um ${p.name}</span><span class="more-chevron" aria-hidden="true">⌄</span></summary><div class="planet-longread" id="planet-longread"><div class="longread-heading"><span class="eyebrow">FYRIR FORVITNA · Á ÍSLENSKU</span><button class="secondary read-btn" data-action="read-section">◖)) Lesa þennan texta upp</button></div>${PLANET_DETAILS[p.id].map(section => `<section><h3>${section.title}</h3><p>${section.text}</p></section>`).join('')}<p class="reading-source">Unnið á einföldu máli upp úr fræðsluefni NASA. <a href="${p.source}" target="_blank" rel="noopener">Heimild (enska) ↗</a></p></div></details></div></section><div class="info-note"><strong>Sólin er stjarna.</strong> Tunglið er fylgihnöttur jarðar. Plútó er dvergreikistjarna og telst ekki ein af átta plánetunum.</div><div class="button-row end-actions"><button class="primary" data-action="prep" data-id="identify">Prófaðu þekkinguna →</button><button class="secondary" data-action="home">Til baka í verkefni</button></div>`, 'atlas');
   main.querySelector(`[data-id="${p.id}"]`)?.setAttribute('aria-current', 'true');
 }
 
@@ -158,7 +161,7 @@ function hint() {
   if (run.kind === 'order') {
     const index = run.slots.findIndex((id, i) => id !== orderPool(run.level)[i].id);
     if (index < 0) { run.feedback = 'Allar pláneturnar virðast vera á réttum stað. Veldu „Athuga röðina“.'; }
-    else { run.helpedSlots.add(index); run.feedback = `Vísbending: Í sæti ${index + 1} á ${orderPool(run.level)[index].name} að vera.`; }
+    else { run.helpedSlots.add(index); run.feedback = `Vísbending: Á sporbraut ${index + 1} á ${orderPool(run.level)[index].name} að vera.`; }
     renderOrder(false);
   } else {
     const q = run.questions[run.index], p = planet(q.planet);
@@ -178,19 +181,35 @@ function next() {
   renderGame();
 }
 
+function orbitScene() {
+  const angles = [-45, 36, -35, 30, -30, 28, -25, 22];
+  const orbits = PLANETS.map((p, i) => {
+    const rx = 100 + 55 * i, ry = 65 + 28 * i;
+    const cx = 85 + Math.sqrt(rx * rx - ry * ry), angle = angles[i] * Math.PI / 180;
+    return { rx, ry, cx, x: cx + rx * Math.cos(angle), y: 280 + ry * Math.sin(angle), active: i < run.slots.length };
+  });
+  return `<div class="orbit-scroll" tabindex="0" role="region" aria-label="Sólkerfið. Á litlum skjá má fletta til hliðar til að sjá allar sporbrautir."><div class="orbit-board"><span class="orbit-board-title">SÓLKERFIÐ ÞITT</span><svg class="orbit-lines" viewBox="0 0 1000 560" aria-hidden="true">${orbits.map((o, i) => `<ellipse class="orbit-line ${o.active ? 'active-orbit' : 'later-orbit'}" data-orbit="${i}" cx="${o.cx}" cy="280" rx="${o.rx}" ry="${o.ry}"/>`).join('')}</svg><div class="orbit-sun">${sun(88)}<strong>Sólin</strong></div>${orbits.map((o, i) => {
+    const id = run.slots[i];
+    const status = run.checked && o.active ? id === orderPool(run.level)[i].id ? 'slot-right' : 'slot-wrong' : '';
+    return `<button class="order-slot orbit-drop ${id ? 'occupied' : ''} ${status} ${o.active ? '' : 'later-slot'}" data-action="slot" data-index="${i}" style="left:${o.x / 10}%;top:${o.y / 5.6}%" ${o.active ? '' : 'disabled'} aria-label="Sporbraut ${i + 1}${!o.active ? '. Ekki æfð á þessu stigi.' : id ? `: ${planet(id).name}. Veldu til að taka úr sporbraut.` : ': tóm. Settu plánetu hér.'}"><span class="slot-number">${i + 1}</span>${id ? `${art(id, 57)}<strong>${planet(id).name}</strong>` : `<span class="landing-dot" aria-hidden="true"></span><small>${o.active ? 'Sleppa hér' : 'Síðar'}</small>`}</button>`;
+  }).join('')}</div></div>`;
+}
 function renderOrder(focus = true) {
   const used = run.slots.filter(Boolean);
-  mount(`${gameTop(run.pool.length)}<section class="game-panel"><div class="question-heading"><h1>Raðaðu frá sólinni og út</h1>${readButton()}</div><p class="readable order-help">Veldu plánetu hér að neðan og svo sætið hennar. Þú getur líka dregið pláneturnar. Veldu skipað sæti til að taka plánetuna úr því.</p><div class="order-origin">${sun(46)}<strong>Sólin</strong><span aria-hidden="true">→</span></div><div class="order-slots" aria-label="Sæti frá sólinni">${run.slots.map((id, i) => `<button class="order-slot ${run.checked ? id === orderPool(run.level)[i].id ? 'slot-right' : 'slot-wrong' : ''}" data-action="slot" data-index="${i}" aria-label="Sæti ${i + 1}${id ? `: ${planet(id).name}. Veldu til að taka úr sæti.` : ': tómt'}"><span class="slot-number">${i + 1}</span>${id ? `${art(id, 60)}<strong>${planet(id).name}</strong>` : '<span class="slot-placeholder" aria-hidden="true">＋</span><small>Setja hér</small>'}</button>`).join('')}</div><div class="planet-bank" aria-label="Plánetur til að raða">${run.pool.map(p => `<button class="bank-planet ${run.selected === p.id ? 'selected' : ''}" data-action="select-planet" data-id="${p.id}" aria-pressed="${run.selected === p.id}" draggable="${!used.includes(p.id)}" ${used.includes(p.id) ? 'disabled' : ''}>${art(p.id, 55)}<strong>${p.name}</strong></button>`).join('')}</div><div id="feedback" class="feedback ${run.feedback ? 'retry' : ''}" role="status" tabindex="-1">${run.feedback}</div><div class="game-actions"><button class="primary" data-action="check-order">Athuga röðina ✓</button><button class="secondary" data-action="hint">✧ Fá vísbendingu</button></div><p class="caption">Stærðir og bil eru ekki í réttum hlutföllum.</p></section>`, 'game', focus);
+  const scroll = main.querySelector('.orbit-scroll')?.scrollLeft || 0;
+  mount(`${gameTop(run.pool.length)}<section class="game-panel orbit-panel"><div class="question-heading"><h1>Settu pláneturnar á rétta sporbraut</h1>${readButton()}</div><p class="readable order-help">Dragðu plánetu á punktinn á réttri sporbraut. Þú getur líka valið plánetu og síðan punkt. ${run.pool.length < 8 ? `Á þessu stigi raðarðu innstu ${run.pool.length} plánetunum; hinar sporbrautirnar bíða.` : 'Raðaðu öllum átta plánetunum frá sólinni og út.'}</p>${orbitScene()}<p class="orbit-scroll-hint">↔ Á litlum skjá má fletta sólkerfinu til hliðar.</p><div class="planet-bank-heading"><h2>Pláneturnar þínar</h2><span>Veldu eða dragðu á sporbraut</span></div><div class="planet-bank" aria-label="Plánetur til að raða">${run.pool.map(p => `<button class="bank-planet ${run.selected === p.id ? 'selected' : ''}" data-action="select-planet" data-id="${p.id}" aria-pressed="${run.selected === p.id}" draggable="${!used.includes(p.id)}" ${used.includes(p.id) ? 'disabled' : ''}>${art(p.id, 55)}<strong>${p.name}</strong></button>`).join('')}</div><div id="feedback" class="feedback ${run.feedback ? 'retry' : ''}" role="status" tabindex="-1">${run.feedback}</div><div class="game-actions"><button class="primary" data-action="check-order">Athuga sporbrautirnar ✓</button><button class="secondary" data-action="hint">✧ Fá vísbendingu</button></div><p class="caption">Sporbrautirnar eru ýktar til að auðvelda röðun. Stærðir og fjarlægðir eru ekki í réttum hlutföllum. Veldu plánetu á sporbraut til að taka hana úr.</p></section>`, 'game', focus);
+  main.querySelector('.orbit-scroll').scrollLeft = scroll;
 }
+
 function place(index) {
   if (!run || run.kind !== 'order' || index < 0 || index >= run.slots.length) return;
   let status;
   if (run.selected) {
     if (run.slots.includes(run.selected)) return;
-    status = `${planet(run.selected).name} sett í sæti ${index + 1}.`;
+    status = `${planet(run.selected).name} sett á sporbraut ${index + 1}.`;
     run.slots[index] = run.selected; run.selected = null;
   } else if (run.slots[index]) {
-    status = `${planet(run.slots[index]).name} tekin úr sæti ${index + 1}.`;
+    status = `${planet(run.slots[index]).name} tekin af sporbraut ${index + 1}.`;
     run.slots[index] = null;
   } else { status = 'Veldu fyrst plánetu neðar á síðunni.'; }
   run.checked = false; run.feedback = status;
@@ -199,11 +218,11 @@ function place(index) {
 }
 function checkOrder() {
   if (!run || run.kind !== 'order') return;
-  if (run.slots.some(id => !id)) { run.feedback = 'Settu plánetu í hvert sæti áður en þú athugar röðina.'; renderOrder(false); main.querySelector('#feedback').focus(); return; }
+  if (run.slots.some(id => !id)) { run.feedback = 'Settu plánetu á hvern virkan punkt áður en þú athugar röðina.'; renderOrder(false); main.querySelector('#feedback').focus(); return; }
   const correct = run.slots.map((id, i) => id === orderPool(run.level)[i].id);
   correct.forEach((right, i) => { if (run.first[i] === null) run.first[i] = right && !run.helpedSlots.has(i); });
   if (correct.every(Boolean)) { run.correct = run.first.filter(Boolean).length; finish(); }
-  else { run.checked = true; run.feedback = `✓ ${correct.filter(Boolean).length} af ${correct.length} eru rétt. Sætin merkt ✓ eru rétt. Endurskoðaðu hin sætin.`; renderOrder(false); main.querySelector('#feedback').focus(); }
+  else { run.checked = true; run.feedback = `✓ ${correct.filter(Boolean).length} af ${correct.length} eru rétt. Sporbrautirnar merktar ✓ eru réttar. Endurskoðaðu hinar.`; renderOrder(false); main.querySelector('#feedback').focus(); }
 }
 function finish() {
   if (!run || run.saved) return;
@@ -235,12 +254,12 @@ function sources() {
   mount(`${breadcrumb('UM FORRITIÐ')}<section class="panel sources"><h1>Stjörnufræði fyrir forvitna nemendur</h1><p>Sex gagnvirkar æfingar og plánetubók á íslensku. Engin tímamörk, engin innskráning og engar auglýsingar. Plánetumyndir eru frá NASA og samstarfsaðilum. Sumar eru samsettar úr mörgum tökum eða með auknum litaskilum til að sýna einkenni. Stjörnubakgrunnurinn er skrautmynd en ekki kort af stjörnuhimninum. Dag- og næturlíkanið er einfölduð teikning.</p><h2>Heimildir og vísindaleg atriði</h2><p>Grunnupplýsingar voru yfirfarnar með fræðsluefni NASA við gerð útgáfunnar. Stærðir og fjarlægðir eru námundaðar. Fjarlægð frá sólu er meðaltal; brautir eru ekki fullkomnir hringir. Nákvæmur fjöldi tungla er ekki gefinn upp þar sem ný tungl finnast.</p><ul>${PLANETS.map(p => `<li><a href="${p.source}" target="_blank" rel="noopener">${p.name} – staðreyndir hjá NASA (enska) ↗</a></li>`).join('')}<li><a href="https://science.nasa.gov/solar-system/planets/" target="_blank" rel="noopener">NASA: Átta plánetur sólkerfisins ↗</a></li></ul><h2>Myndheimildir</h2><ul>${PLANETS.map(p => `<li><a href="${PLANET_IMAGES[p.id].source}" target="_blank" rel="noopener">${p.name}</a>: ${PLANET_IMAGES[p.id].credit}.</li>`).join('')}</ul><h2>Aðgengi og vistun</h2><p>Öll röðunarverkefni má leysa með því að velja eða með lyklaborði. Drag og slepp er viðbót. Tab færir milli hnappa, Enter eða bilslá velur. Engin rétt svör byggja eingöngu á að greina liti.</p><p>Árangur vistast í vafranum. Hægt er að sækja hann sem CSV eða eyða honum á kennarasvæði. Engin nöfn eru skráð og forritið sendir ekki niðurstöður á netþjón. Hýsingaraðili kann að skrá venjulegar heimsóknir á vefinn.</p><p>Forritið reynir að vista kjarnaskrár til notkunar án nets eftir fyrstu heimsókn með nettengingu á HTTPS eða localhost. Upplestur án nets fer eftir röddum tækisins. Ytri NASA-hlekkir þurfa nettengingu.</p><a href="https://github.com/IngiMar90/stjornufraedi" target="_blank" rel="noopener" class="text-link">Skoða verkefnið á GitHub ↗</a></section>`, 'sources');
 }
 
-function read() {
+function read(target = null) {
   if (!('speechSynthesis' in window)) { notify('Þessi vafri styður ekki upplestur.'); return; }
   const voice = speechSynthesis.getVoices().find(v => /^is([-_]|$)/i.test(v.lang));
   if (!voice) { notify('Íslensk rödd er ekki tiltæk. Bættu við íslenskri rödd í stillingum tækisins eða notaðu innbyggðan skjálesara.'); return; }
   speechSynthesis.cancel();
-  const relevant = view === 'game' ? [main.querySelector('h1')?.textContent, ...[...main.querySelectorAll('.readable, .answer-grid')].map(el => el.innerText)].join('. ') : [...main.querySelectorAll('.readable')].map(el => el.innerText).join('. ');
+  const relevant = target ? target.innerText : view === 'game' ? [main.querySelector('h1')?.textContent, ...[...main.querySelectorAll('.readable, .answer-grid')].map(el => el.innerText)].join('. ') : [...main.querySelectorAll('.readable')].map(el => el.innerText).join('. ');
   const utterance = new SpeechSynthesisUtterance(relevant || main.innerText);
   utterance.lang = 'is-IS'; utterance.voice = voice; utterance.rate = 0.85;
   utterance.onerror = () => notify('Upplestur tókst ekki á þessu tæki.');
@@ -255,6 +274,7 @@ main.addEventListener('error', event => {
   if (event.target.matches?.('.planet-photo')) event.target.closest('.planet-art').classList.add('photo-failed');
 }, true);
 main.addEventListener('click', event => {
+  if (event.detail > 0 && ['touch', 'pen'].includes(event.pointerType) && performance.now() < suppressPointerClickUntil) return;
   const b = event.target.closest('button[data-action]');
   if (!b || b.disabled) return;
   const action = b.dataset.action, id = b.dataset.id;
@@ -274,10 +294,15 @@ main.addEventListener('click', event => {
   if (action === 'slot') place(Number(b.dataset.index));
   if (action === 'check-order') checkOrder();
   if (action === 'read') read();
+  if (action === 'read-section') read(main.querySelector('#planet-longread'));
   if (action === 'set-level') setLevel(Number(b.dataset.level));
   if (action === 'export') exportCSV();
   if (action === 'reset') { focusBack = b; document.querySelector('#confirm-dialog').showModal(); document.querySelector('#cancel-reset').focus(); }
 });
+main.addEventListener('toggle', e => {
+  if (!e.target.matches('.planet-more')) return;
+  e.target.querySelector('.more-label').textContent = e.target.open ? 'Sýna minna' : `Nánar um ${main.querySelector('.planet-copy h2').textContent}`;
+}, true);
 main.addEventListener('change', e => { if (e.target.id === 'level') { setLevel(Number(e.target.value)); main.querySelector('#level')?.focus(); } });
 main.addEventListener('input', e => {
   if (e.target.id !== 'rotation') return;
@@ -293,15 +318,64 @@ main.addEventListener('dragstart', e => {
   const b = e.target.closest('[data-action="select-planet"]');
   if (!b || b.disabled || !e.dataTransfer) return;
   e.dataTransfer.setData('text/plain', b.dataset.id); e.dataTransfer.effectAllowed = 'move';
+  b.classList.add('is-dragging');
 });
-main.addEventListener('dragover', e => { const slot = e.target.closest('.order-slot'); if (slot) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; } });
+main.addEventListener('dragover', e => { const slot = e.target.closest('.order-slot:not(:disabled)'); if (slot) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; highlightOrbit(slot); } else highlightOrbit(null); });
+main.addEventListener('dragleave', e => { if (!main.contains(e.relatedTarget)) highlightOrbit(null); });
+main.addEventListener('dragend', () => { highlightOrbit(null); main.querySelector('.is-dragging')?.classList.remove('is-dragging'); });
 main.addEventListener('drop', e => {
   const slot = e.target.closest('.order-slot');
-  if (!slot || run?.kind !== 'order') return;
+  if (!slot || slot.disabled || run?.kind !== 'order') return;
   e.preventDefault(); const id = e.dataTransfer.getData('text/plain');
   if (!run.pool.some(p => p.id === id) || run.slots.includes(id)) return;
   run.selected = id; place(Number(slot.dataset.index));
 });
+function highlightOrbit(slot) {
+  main.querySelectorAll('.is-over').forEach(el => el.classList.remove('is-over'));
+  if (!slot || slot.disabled) return;
+  slot.classList.add('is-over');
+  main.querySelector(`[data-orbit="${slot.dataset.index}"]`)?.classList.add('is-over');
+}
+function endPointerDrag() {
+  pointerDrag?.ghost?.remove();
+  pointerDrag?.source?.classList.remove('is-dragging');
+  pointerDrag = null;
+  highlightOrbit(null);
+}
+main.addEventListener('pointerdown', e => {
+  if (!['touch', 'pen'].includes(e.pointerType) || run?.kind !== 'order') return;
+  const source = e.target.closest('.bank-planet:not(:disabled)');
+  if (!source) return;
+  pointerDrag = { id: source.dataset.id, pointerId: e.pointerId, x: e.clientX, y: e.clientY, source, ghost: null };
+});
+window.addEventListener('pointermove', e => {
+  const drag = pointerDrag;
+  if (!drag || drag.pointerId !== e.pointerId || run?.kind !== 'order') return;
+  if (!drag.ghost && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 10) return;
+  e.preventDefault();
+  if (!drag.ghost) {
+    drag.ghost = document.createElement('div');
+    drag.ghost.className = 'drag-planet-ghost'; drag.ghost.setAttribute('aria-hidden', 'true');
+    drag.ghost.innerHTML = `${art(drag.id, 64)}<strong>${planet(drag.id).name}</strong>`;
+    document.body.append(drag.ghost); drag.source.classList.add('is-dragging');
+  }
+  drag.ghost.style.left = `${e.clientX}px`; drag.ghost.style.top = `${e.clientY}px`;
+  highlightOrbit(document.elementFromPoint(e.clientX, e.clientY)?.closest('.orbit-drop:not(:disabled)'));
+}, { passive: false });
+window.addEventListener('pointerup', e => {
+  const drag = pointerDrag;
+  if (!drag || drag.pointerId !== e.pointerId) return;
+  const wasDragging = Boolean(drag.ghost), id = drag.id;
+  const slot = document.elementFromPoint(e.clientX, e.clientY)?.closest('.orbit-drop:not(:disabled)');
+  const index = slot ? Number(slot.dataset.index) : -1;
+  endPointerDrag();
+  if (!wasDragging || run?.kind !== 'order') return;
+  suppressPointerClickUntil = performance.now() + 500;
+  run.selected = id;
+  if (index >= 0) place(index);
+  else { run.feedback = 'Slepptu plánetunni á merktan punkt. Þú getur líka valið punkt með því að ýta á hann.'; renderOrder(false); }
+});
+window.addEventListener('pointercancel', endPointerDrag);
 document.querySelector('.brand').addEventListener('click', e => { e.preventDefault(); home(); });
 document.querySelector('#home-btn').onclick = () => home();
 document.querySelector('#atlas-btn').onclick = () => atlas();

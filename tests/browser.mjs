@@ -36,6 +36,7 @@ async function start(kind, level) {
   await page.locator(`.mission-card[data-id="${kind}"]`).click();
   assert.ok(await page.locator('.step-label').count() >= 2);
   await click('start', kind);
+  if (kind === 'order') { assert.equal(await page.locator('.orbit-line').count(), 8); assert.equal(await page.locator('.orbit-drop:not(:disabled)').count(), level === 1 ? 4 : level === 2 ? 6 : 8); }
 }
 async function correctAnswer(kind) {
   if (kind === 'identify' || kind === 'sort') {
@@ -114,10 +115,29 @@ try {
   await click('reset'); await page.locator('#cancel-reset').click(); assert.equal(await page.locator('tbody tr').count(), 20);
   console.log('PASS: ordering feedback, persistent history, CSV and reset cancellation');
 
+  await start('order', 3);
+  await page.evaluate(async () => { await Promise.all([...document.images].map(img => img.decode())); });
+  if (process.env.UI_SCREENSHOT_DIR) await page.screenshot({ path: `${process.env.UI_SCREENSHOT_DIR}/orbit-order.png`, fullPage: true });
+  await page.locator('[data-action="select-planet"][data-id="mercury"]').dragTo(page.locator('[data-action="slot"][data-index="0"]'));
+  assert.match(await page.locator('[data-action="slot"][data-index="0"]').innerText(), /Merkúríus/);
+  const touchSource = page.locator('[data-action="select-planet"][data-id="venus"]');
+  await touchSource.scrollIntoViewIfNeeded();
+  const from = await touchSource.boundingBox(), to = await page.locator('[data-action="slot"][data-index="1"]').boundingBox();
+  const pointer = { pointerId: 77, pointerType: 'touch', isPrimary: true, buttons: 1, clientX: from.x + from.width / 2, clientY: from.y + from.height / 2 };
+  await touchSource.dispatchEvent('pointerdown', pointer);
+  await page.evaluate(({ x, y }) => window.dispatchEvent(new PointerEvent('pointermove', { pointerId: 77, pointerType: 'touch', isPrimary: true, buttons: 1, clientX: x, clientY: y, bubbles: true, cancelable: true })), { x: to.x + to.width / 2, y: to.y + to.height / 2 });
+  assert.equal(await page.locator('.drag-planet-ghost').count(), 1);
+  assert.equal(await page.locator('.orbit-line.is-over').count(), 1);
+  await page.evaluate(({ x, y }) => window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 77, pointerType: 'touch', isPrimary: true, clientX: x, clientY: y, bubbles: true })), { x: to.x + to.width / 2, y: to.y + to.height / 2 });
+  assert.match(await page.locator('[data-action="slot"][data-index="1"]').innerText(), /Venus/);
+  assert.equal(await page.locator('.drag-planet-ghost').count(), 0);
+  console.log('PASS: eight numbered orbits, native mouse drag, touch drag and orbit highlighting');
+
+
   for (const width of [360, 768, 1440]) {
     await page.setViewportSize({ width, height: 1000 }); await home(); await overflow(`home ${width}`);
     await page.locator('#atlas-btn').click(); await overflow(`atlas ${width}`);
-    for (const p of PLANETS) { await click('atlas', p.id); assert.equal(await page.locator('.planet-copy h2').innerText(), p.name); await page.waitForFunction(() => [...document.images].every(img => img.complete && img.naturalWidth > 0)); assert.match(await page.locator('.photo-credit').innerText(), /NASA/); }
+    for (const p of PLANETS) { await click('atlas', p.id); assert.equal(await page.locator('.planet-copy h2').innerText(), p.name); await page.waitForFunction(() => [...document.images].every(img => img.complete && img.naturalWidth > 0)); assert.match(await page.locator('.photo-credit').innerText(), /NASA/); assert.equal(await page.locator('.planet-more').getAttribute('open'), null); await page.locator('.planet-more summary').click(); assert.equal(await page.locator('.planet-longread section').count(), 3); await page.waitForFunction(() => document.querySelector('.more-label').textContent === 'Sýna minna'); await overflow(`expanded ${p.id} ${width}`); if (process.env.UI_SCREENSHOT_DIR && p.id === 'earth' && [360, 1440].includes(width)) await page.screenshot({path: `${process.env.UI_SCREENSHOT_DIR}/planet-reader-${width}.png`, fullPage:true}); await page.locator('.planet-more summary').click(); }
     await page.locator('#teacher-btn').click(); await overflow(`teacher ${width}`);
     for (const a of ACTIVITIES) { await start(a.id, 3); await overflow(`${a.id} ${width}`); }
   }
@@ -142,6 +162,7 @@ try {
   assert.equal(await page.locator('.mission-card').count(), 6);
   await page.locator('#atlas-btn').click();
   for (const p of PLANETS) { await click('atlas', p.id); await page.waitForFunction(() => [...document.images].every(img => img.complete && img.naturalWidth > 0)); }
+  await page.locator('.planet-more summary').click(); assert.equal(await page.locator('.planet-longread section').count(), 3);
   await start('day', 1); await finishQuiz('day');
   await context.setOffline(false);
   await page.locator('#teacher-btn').click(); await click('reset'); await page.locator('#confirm-reset').click();

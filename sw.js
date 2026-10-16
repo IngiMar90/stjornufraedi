@@ -1,6 +1,6 @@
-const CACHE = 'stjornufraedi-v1.1.0';
+const CACHE = 'stjornufraedi-v1.2.0';
 const BASE = new URL('./', self.location.href);
-const FILES = ['./', './index.html', './styles.css', './app.js', './data.js', './imagery.js', './assets/starfield.svg', './assets/planets/mercury.jpg', './assets/planets/venus.jpg', './assets/planets/earth.jpg', './assets/planets/mars.jpg', './assets/planets/jupiter.jpg', './assets/planets/saturn.jpg', './assets/planets/uranus.jpg', './assets/planets/neptune.jpg', './icon.svg', './manifest.webmanifest'];
+const FILES = ['./', './index.html', './styles.css', './app.js', './data.js', './imagery.js', './planet-details.js', './assets/starfield.svg', './assets/planets/mercury.jpg', './assets/planets/venus.jpg', './assets/planets/earth.jpg', './assets/planets/mars.jpg', './assets/planets/jupiter.jpg', './assets/planets/saturn.jpg', './assets/planets/uranus.jpg', './assets/planets/neptune.jpg', './icon.svg', './manifest.webmanifest'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES.map(f => new URL(f, BASE).href))));
 });
