@@ -47,6 +47,18 @@ npm test
 
 GitHub Actions keyrir sömu gagnapróf og JavaScript-setningafræðiskoðun við push og pull request.
 
+### Vafrapróf
+
+Valfrjáls heildarpróf í Chromium:
+
+```sh
+npm install --no-save playwright
+npx playwright install chromium
+node tests/browser.mjs
+```
+
+Þau keyra allar æfingar á öllum stigum, röng svör og vísbendingar, röðun með hnöppum og lyklaborði, skjástærðir 360/768/1440 px, stærra letur, plánetubók, CSV, vistun, hreinsun niðurstaðna og notkun án nets. Prófin ræsa eigin tímabundinn vefþjón og prófa undirslóð eins og á GitHub Pages.
+
 ## Birta með GitHub Pages
 
 Kóðinn er tilbúinn til hýsingar beint úr rót `main`:

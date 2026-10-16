@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1425">
+  <meta name="description" content="Kannaðu sólkerfið með gagnvirkum stjörnufræðiæfingum á íslensku.">
+  <title>Stjörnufræði · Leiðangur um sólkerfið</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Fara í efni</a>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Stjörnufræði, forsíða"><span class="brand-icon" aria-hidden="true">✦</span><span>Stjörnu<span class="mint">fræði</span><small>LEIÐANGUR UM SÓLKERFIÐ</small></span></a>
+    <nav aria-label="Aðalvalmynd">
+      <button id="home-btn" class="nav-button">Verkefni</button>
+      <button id="atlas-btn" class="nav-button">Plánetubók</button>
+      <button id="teacher-btn" class="nav-button">Kennarasvæði</button>
+    </nav>
+    <div class="tools"><button id="text-btn" class="icon-btn" aria-label="Stækka letur" aria-pressed="false">A<span class="small-a">A</span></button><button id="fullscreen-btn" class="icon-btn" aria-label="Fylla skjá"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg></button></div>
+  </header>
+  <main id="main" tabindex="-1"></main>
+  <footer class="site-footer"><span>Forvitni er fyrsta skrefið út í geim.</span><button id="sources-btn" class="text-button">Um forritið og heimildir ↗</button></footer>
+  <div id="notice" role="status" class="notice" hidden></div>
+  <dialog id="confirm-dialog" aria-labelledby="dialog-title"><h2 id="dialog-title">Eyða vistuðum árangri?</h2><p>Þetta eyðir öllum niðurstöðum stjörnufræðiforritsins í þessum vafra á þessu tæki.</p><div class="button-row"><button id="cancel-reset" class="secondary">Hætta við</button><button id="confirm-reset" class="danger">Eyða niðurstöðum</button></div></dialog>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
