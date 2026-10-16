@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { KNOWLEDGE_QUESTIONS } from '../knowledge.js';
 import assert from 'node:assert/strict';
 import { PLANETS, ACTIVITIES, makeQuestions, orderPool, isDay, groupFor, scoreStars, readProgress } from '../data.js';
 
@@ -18,8 +19,9 @@ test('Each difficulty has an appropriate ordering pool', () => {
 test('Generated quizzes always have one correct option, five distinct targets, and valid answers', () => {
   for (let n = 0; n < 150; n++) for (const level of [1, 2, 3]) for (const kind of ACTIVITIES.map(a => a.id).filter(id => id !== 'order')) {
     const questions = makeQuestions(kind, level);
-    assert.equal(questions.length, 5);
-    assert.equal(new Set(questions.map(q => q.planet || q.angle)).size, 5);
+    const length = kind === 'knowledge' ? 10 : 5;
+    assert.equal(questions.length, length);
+    assert.equal(new Set(questions.map(q => q.id || q.planet || q.angle)).size, length);
     if (kind === 'identify' || kind === 'clues') {
       const positions = questions.map(q => q.options.indexOf(q.answer));
       assert.equal(new Set(positions).size, level + 1, 'vary the correct answer position across the round');
@@ -33,6 +35,13 @@ test('Generated quizzes always have one correct option, five distinct targets, a
         const [a, b] = q.options.map(id => PLANETS.find(p => p.id === id));
         assert.equal(q.answer, a.diameter > b.diameter ? a.id : b.id);
         if (level === 1) assert.ok(Math.max(a.diameter, b.diameter) / Math.min(a.diameter, b.diameter) >= 2);
+      }
+      if (kind === 'knowledge') {
+        assert.equal(q.options.length, level + 1);
+        assert.equal(q.labels[q.answer], q.correct);
+        assert.equal(new Set(Object.values(q.labels)).size, q.options.length);
+        assert.ok(q.hint && q.explanation);
+        assert.equal(q.level, level);
       }
       if (kind === 'day') {
         assert.equal(q.answer, isDay(q.angle) ? 'day' : 'night');
@@ -60,4 +69,24 @@ test('Invalid or outdated storage cannot break the app; valid history is capped'
   const invalid = [{ ...good, kind: 'unknown' }, { ...good, correct: 6 }, { ...good, date: '<img>' }, { ...good, hints: -1 }];
   assert.deepEqual(readProgress(JSON.stringify({ version: 1, sessions: [...invalid, good] })).sessions, [good]);
   assert.equal(readProgress(JSON.stringify({ version: 1, sessions: Array(350).fill(good) })).sessions.length, 300);
+});
+
+test('Planet knowledge bank has 36 unique questions and balances answer positions on every level', () => {
+  assert.equal(KNOWLEDGE_QUESTIONS.length, 36);
+  assert.equal(new Set(KNOWLEDGE_QUESTIONS.map(q => q.id)).size, 36);
+  assert.equal(new Set(KNOWLEDGE_QUESTIONS.map(q => q.stem)).size, 36);
+  for (const q of KNOWLEDGE_QUESTIONS) {
+    assert.equal(q.wrong.length, 3);
+    assert.equal(new Set([q.correct, ...q.wrong]).size, 4);
+    assert.ok(q.topic === 'solar-system' || PLANETS.some(p => p.id === q.topic));
+  }
+  for (const level of [1, 2, 3]) {
+    assert.equal(KNOWLEDGE_QUESTIONS.filter(q => q.level === level).length, 12);
+    for (let n = 0; n < 100; n++) {
+      const round = makeQuestions('knowledge', level);
+      const counts = Array(level + 1).fill(0);
+      for (const q of round) counts[q.options.indexOf(q.answer)]++;
+      assert.ok(Math.max(...counts) - Math.min(...counts) <= 1);
+    }
+  }
 });

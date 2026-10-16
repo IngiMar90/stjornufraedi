@@ -1,3 +1,5 @@
+import { KNOWLEDGE_QUESTIONS } from './knowledge.js';
+
 export const PLANETS = [
   { id: 'mercury', name: 'Merkúríus', order: 1, diameter: 4879, year: '88 jarðardagar', distance: '58 milljón km', type: 'rock', tag: 'Næst sólinni',
     intro: 'Merkúríus er minnsta plánetan og sú sem er næst sólinni.',
@@ -57,7 +59,10 @@ export const ACTIVITIES = [
     example: 'Júpíter er stærri en jörðin. Ef spurt er hvor er stærri veljum við Júpíter.', task: 'Veldu plánetuna sem hefur meira þvermál. Á fyrstu tveimur stigunum hjálpa myndirnar. Á þriðja stigi lestu þvermálið.' },
   { id: 'day', icon: '◐', color: 'rose', title: 'Dagur og nótt', text: 'Snúðu jörðinni. Hvar er dagur og hvar er nótt?', skill: 'Orsök og afleiðing',
     lesson: 'Sólin lýsir upp þá hlið jarðar sem snýr að henni. Þar er dagur. Hin hliðin er í skugga og þar er nótt. Jörðin snýst og því skiptast dagur og nótt á.',
-    example: 'Þegar merkti staðurinn snýr að sólinni er þar dagur. Þegar hann snýr frá sólinni er þar nótt.', task: 'Prófaðu fyrst að snúa jörðinni með sleðanum. Í verkefninu velurðu hvort er dagur eða nótt á merkta staðnum.' }
+    example: 'Þegar merkti staðurinn snýr að sólinni er þar dagur. Þegar hann snýr frá sólinni er þar nótt.', task: 'Prófaðu fyrst að snúa jörðinni með sleðanum. Í verkefninu velurðu hvort er dagur eða nótt á merkta staðnum.' },
+  { id: 'knowledge', icon: '?', color: 'lilac', title: 'Hvað veit ég um pláneturnar?', text: 'Prófaðu það sem þú lærðir í plánetubókinni. Veldu rétt svar og lærðu meira.', skill: 'Fróðleikur og lesskilningur',
+    lesson: 'Spurningarnar byggja á upplýsingum í plánetubókinni. Á stigum 1 og 2 nýtirðu grunnupplýsingarnar. Á stigi 3 koma líka spurningar úr Nánar textunum. Lestu spurninguna og berðu saman svörin áður en þú velur.',
+    example: 'Spurning: Hvaða pláneta er kölluð rauða plánetan? Rétt svar: Mars. Rauðleitur litur er eitt af einkennum hennar.', task: 'Svaraðu tíu fjölvalsspurningum. Þú mátt fá vísbendingu og reyna aftur. Eftir rétt svar færðu stutta útskýringu. Í lokin geturðu skoðað svarlykil lotunnar.' }
 ];
 
 export function shuffle(items, random = Math.random) {
@@ -71,6 +76,15 @@ export function isDay(angle) { return Math.cos(angle * Math.PI / 180) > 0; }
 export function groupFor(p, level) { return level === 1 && p.type !== 'rock' ? 'giant' : p.type; }
 export function makeQuestions(kind, level, random = Math.random) {
   const count = level + 1;
+  if (kind === 'knowledge') {
+    const positions = shuffle(Array.from({ length: count }, (_, i) => i), random);
+    return shuffle(KNOWLEDGE_QUESTIONS.filter(q => q.level === level), random).slice(0, 10).map((q, index) => {
+      const choices = shuffle(q.wrong, random).slice(0, count - 1);
+      const position = positions[index % count];
+      choices.splice(position, 0, q.correct);
+      return { ...q, labels: Object.fromEntries(choices.map((text, i) => [`choice-${i}`, text])), options: choices.map((_, i) => `choice-${i}`), answer: `choice-${position}` };
+    });
+  }
   const targets = shuffle(PLANETS, random).slice(0, 5);
   const positions = shuffle(Array.from({ length: count }, (_, i) => i), random);
   if (kind === 'day') return shuffle([0, 45, 135, 180, 225, 315, 60, 120, 240, 300], random).slice(0, 5).map(angle => ({ angle, answer: isDay(angle) ? 'day' : 'night', options: ['day', 'night'] }));

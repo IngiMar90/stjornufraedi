@@ -10,6 +10,7 @@ Gagnvirkt íslenskt kennsluforrit fyrir grunnskóla. Keyrir sem venjulegur vefur
 - **Geimspæjarinn:** lesskilningur og ályktun út frá vísbendingum.
 - **Plánetufjölskyldur:** bergplánetur og risaplánetur á stigi 1; bergplánetur, gasrisar og ísrisar á stigum 2–3.
 - **Stór eða smá?** Samanburður á þvermáli. Hlutföll mynda hjálpa á stigum 1–2; á stigi 3 eru myndir jafn stórar og tölurnar ráða.
+- **Hvað veit ég um pláneturnar?** 36 fjölvalsspurningar úr plánetubókinni, 12 á hverju stigi. Tíu spurningar eru valdar af handahófi í lotu, án endurtekningar innan lotu. Stig 1–2 nota grunnupplýsingar en stig 3 líka Nánar textana. 2/3/4 svarmöguleikar eftir stigi, jöfn dreifing á staðsetningu réttra svara, vísbendingar, útskýringar og svarlykill lotunnar í lokin.
 - **Dagur og nótt:** snúa líkani með sleða í undirbúningi og finna hvort merktur staður á miðbaug er í birtu eða skugga í æfingunni.
 
 Hvert verkefni hefur útskýringu → sýnidæmi → sjálfstæða æfingu. Engin tímamörk. Röng svör gefa tækifæri til að reyna aftur. Stærðir og fjarlægðir eru einfaldaðar nema sérstaklega sé tekið fram að útlínur stærðarhringja sýni rétt innbyrðis hlutföll þvermáls. Geimmyndir geta verið samsettar eða með auknum litaskilum. Stjörnuhiminninn er skrautbakgrunnur og blikkar ekki.
@@ -24,8 +25,9 @@ Hvert verkefni hefur útskýringu → sýnidæmi → sjálfstæða æfingu. Engi
 | Flokkun | Berg / risi | Berg / gasrisi / ísrisi | Berg / gasrisi / ísrisi |
 | Stærð | Skýr stærðarmunur á myndum | Myndir og þvermál | Þvermál, myndir jafn stórar |
 | Dagur og nótt | 2 svör | 2 svör | 2 svör |
+| Hvað veit ég um pláneturnar? | 10 spurningar, 2 svör | 10 spurningar, 3 svör | 10 spurningar, 4 svör; Nánar efni |
 
-Ein stjarna fæst fyrir að ljúka lotu, tvær fyrir ≥60% rétt í fyrstu tilraun án vísbendingar og þrjár fyrir allt rétt í fyrstu tilraun án vísbendingar. Röðun telur hvert sæti. Sæti sem vísbending leiddi í ljós telur ekki sem rétt án hjálpar. Besta stjörnugjöf hvers verkefnis á hverju stigi ræður heildinni (hámark 54).
+Ein stjarna fæst fyrir að ljúka lotu, tvær fyrir ≥60% rétt í fyrstu tilraun án vísbendingar og þrjár fyrir allt rétt í fyrstu tilraun án vísbendingar. Röðun telur hvert sæti. Sæti sem vísbending leiddi í ljós telur ekki sem rétt án hjálpar. Besta stjörnugjöf hvers verkefnis á hverju stigi ræður heildinni (hámark 63).
 
 Kennarasvæði sýnir síðustu 30 lotur og CSV-niðurhal með öllum vistuðum lotum (að hámarki 300). CSV notar UTF-8 BOM og semíkommu fyrir töflureikna. Niðurstöður eru sameiginlegar fyrir vafrann á tækinu; engin nemendanöfn eru geymd. Kennarasvæði er opið án lykilorðs. Sækið og hreinsið niðurstöður þegar skipt er um nemanda.
 
