@@ -11,7 +11,7 @@ import { PLANETS, ACTIVITIES, STORAGE_KEY } from '../data.js';
 const require = createRequire(import.meta.url);
 const { chromium } = process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES ? require(`${process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES}/playwright`) : require('playwright');
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const mime = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
+const mime = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json', '.jpg': 'image/jpeg' };
 const server = createServer(async (req, res) => {
   try {
     // Test at a nested base path, just like GitHub Pages.
@@ -66,6 +66,9 @@ async function overflow(label) {
 try {
   await page.goto(base);
   assert.equal(await page.locator('.mission-card').count(), 6);
+  await page.waitForFunction(() => [...document.images].every(img => img.complete && img.naturalWidth > 0));
+  assert.match(await page.evaluate(() => getComputedStyle(document.body).backgroundImage), /starfield\.svg/);
+  await page.evaluate(async () => { await Promise.all([...document.images].map(img => img.decode())); });
   await page.screenshot({ path: process.env.UI_SCREENSHOT_DIR ? `${process.env.UI_SCREENSHOT_DIR}/home-desktop.png` : '/tmp/stjornufraedi-desktop.png', fullPage: true });
   for (const level of [1, 2, 3]) for (const a of ACTIVITIES) {
     await start(a.id, level);
@@ -114,13 +117,14 @@ try {
   for (const width of [360, 768, 1440]) {
     await page.setViewportSize({ width, height: 1000 }); await home(); await overflow(`home ${width}`);
     await page.locator('#atlas-btn').click(); await overflow(`atlas ${width}`);
-    for (const p of PLANETS) { await click('atlas', p.id); assert.equal(await page.locator('.planet-copy h2').innerText(), p.name); }
+    for (const p of PLANETS) { await click('atlas', p.id); assert.equal(await page.locator('.planet-copy h2').innerText(), p.name); await page.waitForFunction(() => [...document.images].every(img => img.complete && img.naturalWidth > 0)); assert.match(await page.locator('.photo-credit').innerText(), /NASA/); }
     await page.locator('#teacher-btn').click(); await overflow(`teacher ${width}`);
     for (const a of ACTIVITIES) { await start(a.id, 3); await overflow(`${a.id} ${width}`); }
   }
   await page.setViewportSize({ width: 360, height: 900 }); await home(); await page.locator('#text-btn').click(); await overflow('large type mobile home');
   for (const a of ACTIVITIES) { await start(a.id, 3); await overflow(`large type mobile ${a.id}`); }
   await home();
+  await page.evaluate(async () => { await Promise.all([...document.images].map(img => img.decode())); });
   await page.screenshot({ path: process.env.UI_SCREENSHOT_DIR ? `${process.env.UI_SCREENSHOT_DIR}/home-mobile.png` : '/tmp/stjornufraedi-mobile.png', fullPage: true });
   await page.locator('#text-btn').click();
   // Keyboard-only placement is supported using the same buttons as pointer input.
@@ -136,6 +140,8 @@ try {
   await page.evaluate(async () => { await navigator.serviceWorker.ready; });
   await page.reload(); await context.setOffline(true); await page.reload();
   assert.equal(await page.locator('.mission-card').count(), 6);
+  await page.locator('#atlas-btn').click();
+  for (const p of PLANETS) { await click('atlas', p.id); await page.waitForFunction(() => [...document.images].every(img => img.complete && img.naturalWidth > 0)); }
   await start('day', 1); await finishQuiz('day');
   await context.setOffline(false);
   await page.locator('#teacher-btn').click(); await click('reset'); await page.locator('#confirm-reset').click();

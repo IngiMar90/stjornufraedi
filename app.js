@@ -1,3 +1,4 @@
+import { PLANET_IMAGES } from './imagery.js';
 import { PLANETS, TYPES, LEVELS, ACTIVITIES, STORAGE_KEY, shuffle, planet, orderPool, isDay, groupFor, makeQuestions, scoreStars, readProgress } from './data.js';
 
 const main = document.querySelector('main');
@@ -27,9 +28,11 @@ function save(key, value) {
   try { localStorage.setItem(key, value); return true; }
   catch { storageOK = false; notify('Ekki tókst að vista í vafranum. Niðurstöður haldast aðeins meðan forritið er opið.'); return false; }
 }
-function art(id, size = 90, labelled = false) {
-  const p = planet(id);
-  return `<span class="planet-art ${id}" style="--size:${size}px" ${labelled ? `role="img" aria-label="Einfölduð teikning: ${p.name}"` : 'aria-hidden="true"'}><span class="sphere"></span></span>`;
+function art(id, size = 90, labelled = false, diameter = false) {
+  const p = planet(id), photo = PLANET_IMAGES[id];
+  const [x, y, side] = diameter && photo.globeFrame ? photo.globeFrame : photo.frame;
+  const style = `width:${photo.width / side * 100}%;left:${-x / side * 100}%;top:${-y / side * 100}%;`;
+  return `<span class="planet-art ${id} photo${diameter ? ' diameter-view' : ''}" style="--size:${size}px" ${labelled ? `role="img" aria-label="Geimmynd: ${p.name}"` : 'aria-hidden="true"'}><span class="sphere"></span><span class="photo-window"><img class="planet-photo" src="./assets/planets/${id}.jpg" style="${style}" alt="" draggable="false" decoding="async"></span></span>`;
 }
 function sun(size = 70) { return `<span class="sun" style="--size:${size}px" aria-hidden="true"></span>`; }
 function breadcrumb(label) { return `<button class="back text-button" data-action="home">← Öll verkefni</button><span class="eyebrow">${label}</span>`; }
@@ -65,7 +68,7 @@ function solarStrip() {
 function atlas(id = 'earth') {
   run = null;
   const p = planet(id) || PLANETS[2];
-  mount(`${breadcrumb('PLÁNETUBÓK')}<div class="page-heading"><div><h1>Kynnumst plánetunum</h1><p>Veldu plánetu til að skoða hana nánar.</p></div>${readButton()}</div>${solarStrip()}<section class="planet-detail readable"><div class="planet-portrait">${art(p.id, 220, true)}<span class="portrait-tag">${p.tag}</span></div><div class="planet-copy"><span class="eyebrow">${p.order}. FRÁ SÓLINNI · ${TYPES[p.type]}</span><h2>${p.name}</h2><p class="intro-text">${p.intro}</p><dl class="fact-grid"><div><dt>Þvermál, um það bil</dt><dd>${fmt(p.diameter)} km</dd></div><div><dt>Einn hringur um sólina</dt><dd>${p.year}</dd></div><div><dt>Meðalfjarlægð frá sólu</dt><dd>${p.distance}</dd></div></dl><ul class="fact-list">${p.facts.map(f => `<li>${f}</li>`).join('')}</ul><a href="${p.source}" target="_blank" rel="noopener" class="text-link">Nánar hjá NASA (enska) ↗</a></div></section><div class="info-note"><strong>Sólin er stjarna.</strong> Tunglið er fylgihnöttur jarðar. Plútó er dvergreikistjarna og telst ekki ein af átta plánetunum.</div><div class="button-row end-actions"><button class="primary" data-action="prep" data-id="identify">Prófaðu þekkinguna →</button><button class="secondary" data-action="home">Til baka í verkefni</button></div>`, 'atlas');
+  mount(`${breadcrumb('PLÁNETUBÓK')}<div class="page-heading"><div><h1>Kynnumst plánetunum</h1><p>Veldu plánetu til að skoða hana nánar.</p></div>${readButton()}</div>${solarStrip()}<section class="planet-detail readable"><div class="planet-portrait">${art(p.id, 220, true)}<span class="portrait-tag">${p.tag}</span><a class="photo-credit" href="${PLANET_IMAGES[p.id].source}" target="_blank" rel="noopener">Mynd: ${PLANET_IMAGES[p.id].credit} ↗</a></div><div class="planet-copy"><span class="eyebrow">${p.order}. FRÁ SÓLINNI · ${TYPES[p.type]}</span><h2>${p.name}</h2><p class="intro-text">${p.intro}</p><dl class="fact-grid"><div><dt>Þvermál, um það bil</dt><dd>${fmt(p.diameter)} km</dd></div><div><dt>Einn hringur um sólina</dt><dd>${p.year}</dd></div><div><dt>Meðalfjarlægð frá sólu</dt><dd>${p.distance}</dd></div></dl><ul class="fact-list">${p.facts.map(f => `<li>${f}</li>`).join('')}</ul><a href="${p.source}" target="_blank" rel="noopener" class="text-link">Nánar hjá NASA (enska) ↗</a></div></section><div class="info-note"><strong>Sólin er stjarna.</strong> Tunglið er fylgihnöttur jarðar. Plútó er dvergreikistjarna og telst ekki ein af átta plánetunum.</div><div class="button-row end-actions"><button class="primary" data-action="prep" data-id="identify">Prófaðu þekkinguna →</button><button class="secondary" data-action="home">Til baka í verkefni</button></div>`, 'atlas');
   main.querySelector(`[data-id="${p.id}"]`)?.setAttribute('aria-current', 'true');
 }
 
@@ -110,19 +113,19 @@ function renderGame(focus = true) {
   if (run.kind === 'order') return renderOrder(focus);
   const q = run.questions[run.index], p = planet(q.planet);
   let visual = '';
-  if (run.kind === 'identify') visual = `<div class="question-planet" role="img" aria-label="Ónefnd pláneta. Skoðaðu lit og einkenni myndarinnar.">${art(p.id, 170)}</div><p class="caption">Einfölduð teikning. Veldu heiti sem passar við myndina.</p>`;
+  if (run.kind === 'identify') visual = `<div class="question-planet" role="img" aria-label="Ónefnd pláneta. Skoðaðu lit og einkenni myndarinnar.">${art(p.id, 170)}</div><p class="caption">Geimmynd. Veldu heiti sem passar við myndina.</p>`;
   if (run.kind === 'clues') {
     const visible = Math.min(3, (run.level === 1 ? 2 : 1) + run.hintCount);
     visual = `<div class="clue-box"><span class="clue-icon" aria-hidden="true">✧</span>${p.clues.slice(0, visible).map((c, i) => `<p><span>${i + 1}</span> „${c}“</p>`).join('')}</div>`;
   }
   if (run.kind === 'sort') visual = `<div class="question-planet">${art(p.id, 145)}<strong>${p.name}</strong></div>`;
-  if (run.kind === 'size') visual = `<p class="caption">${run.level === 3 ? 'Myndirnar eru jafn stórar. Berðu saman tölurnar fyrir þvermál.' : 'Þvermál plánetanna er sýnt í réttum innbyrðis hlutföllum.'}</p>`;
+  if (run.kind === 'size') visual = `<p class="caption">${run.level === 3 ? 'Myndirnar eru jafn stórar. Berðu saman tölurnar fyrir þvermál.' : 'Útlínur hringjanna sýna þvermál hnattanna í réttum hlutföllum. Hringakerfi eru ekki talin með.'}</p>`;
   if (run.kind === 'day') visual = dayDiagram(q.angle);
   const maxD = run.kind === 'size' ? Math.max(...q.options.map(id => planet(id).diameter)) : 1;
   const options = q.options.map((id, i) => {
     const pl = planet(id);
     let label = optionText(id);
-    if (run.kind === 'size') label = `<span class="size-art">${art(id, run.level === 3 ? 100 : 170 * pl.diameter / maxD)}</span><strong>${pl.name}</strong>${run.level >= 2 ? `<small>Þvermál: um ${fmt(pl.diameter)} km</small>` : ''}`;
+    if (run.kind === 'size') label = `<span class="size-art">${art(id, run.level === 3 ? 100 : 170 * pl.diameter / maxD, false, true)}</span><strong>${pl.name}</strong>${run.level >= 2 ? `<small>Þvermál: um ${fmt(pl.diameter)} km</small>` : ''}`;
     return `<button class="answer ${run.kind === 'size' ? 'size-answer' : ''} ${run.wrong.includes(id) ? 'incorrect' : ''} ${run.answered && id === q.answer ? 'correct' : ''}" data-action="answer" data-id="${id}" ${run.answered || run.wrong.includes(id) ? 'disabled' : ''}><span class="answer-letter" aria-hidden="true">${String.fromCharCode(65 + i)}</span>${label}${run.answered && id === q.answer ? '<span class="answer-check" aria-hidden="true">✓</span>' : ''}</button>`;
   }).join('');
   mount(`${gameTop(5)}<section class="game-panel"><div class="question-heading"><h1>${questionTitle(q)}</h1>${readButton()}</div><div class="readable">${visual}</div><div class="answer-grid ${run.kind === 'size' ? 'size-grid' : ''}" aria-label="Svarmöguleikar">${options}</div><div id="feedback" class="feedback ${run.answered ? 'success' : run.feedback ? 'retry' : ''}" role="status" tabindex="-1">${run.feedback}</div><div class="game-actions">${run.answered ? `<button class="primary" data-action="next">${run.index === 4 ? 'Sjá árangur' : 'Næsta verkefni'} →</button>` : `<button class="secondary" data-action="hint">✧ Fá vísbendingu</button><p>Þú mátt prófa aftur.</p>`}</div></section>`, 'game', focus);
@@ -229,7 +232,7 @@ function exportCSV() {
 }
 function sources() {
   run = null;
-  mount(`${breadcrumb('UM FORRITIÐ')}<section class="panel sources"><h1>Stjörnufræði fyrir forvitna nemendur</h1><p>Sex gagnvirkar æfingar og plánetubók á íslensku. Engin tímamörk, engin innskráning og engar auglýsingar. Teikningar eru unnar fyrir forritið og eru einfölduð líkön, ekki ljósmyndir. Litir geta verið ýktir til að auðvelda greiningu; raunverulegar myndir geta litið öðruvísi út.</p><h2>Heimildir og vísindaleg atriði</h2><p>Grunnupplýsingar voru yfirfarnar með fræðsluefni NASA við gerð útgáfunnar. Stærðir og fjarlægðir eru námundaðar. Fjarlægð frá sólu er meðaltal; brautir eru ekki fullkomnir hringir. Nákvæmur fjöldi tungla er ekki gefinn upp þar sem ný tungl finnast.</p><ul>${PLANETS.map(p => `<li><a href="${p.source}" target="_blank" rel="noopener">${p.name} – staðreyndir hjá NASA (enska) ↗</a></li>`).join('')}<li><a href="https://science.nasa.gov/solar-system/planets/" target="_blank" rel="noopener">NASA: Átta plánetur sólkerfisins ↗</a></li></ul><h2>Aðgengi og vistun</h2><p>Öll röðunarverkefni má leysa með því að velja eða með lyklaborði. Drag og slepp er viðbót. Tab færir milli hnappa, Enter eða bilslá velur. Engin rétt svör byggja eingöngu á að greina liti.</p><p>Árangur vistast í vafranum. Hægt er að sækja hann sem CSV eða eyða honum á kennarasvæði. Engin nöfn eru skráð og forritið sendir ekki niðurstöður á netþjón. Hýsingaraðili kann að skrá venjulegar heimsóknir á vefinn.</p><p>Forritið reynir að vista kjarnaskrár til notkunar án nets eftir fyrstu heimsókn með nettengingu á HTTPS eða localhost. Upplestur án nets fer eftir röddum tækisins. Ytri NASA-hlekkir þurfa nettengingu.</p><a href="https://github.com/IngiMar90/stjornufraedi" target="_blank" rel="noopener" class="text-link">Skoða verkefnið á GitHub ↗</a></section>`, 'sources');
+  mount(`${breadcrumb('UM FORRITIÐ')}<section class="panel sources"><h1>Stjörnufræði fyrir forvitna nemendur</h1><p>Sex gagnvirkar æfingar og plánetubók á íslensku. Engin tímamörk, engin innskráning og engar auglýsingar. Plánetumyndir eru frá NASA og samstarfsaðilum. Sumar eru samsettar úr mörgum tökum eða með auknum litaskilum til að sýna einkenni. Stjörnubakgrunnurinn er skrautmynd en ekki kort af stjörnuhimninum. Dag- og næturlíkanið er einfölduð teikning.</p><h2>Heimildir og vísindaleg atriði</h2><p>Grunnupplýsingar voru yfirfarnar með fræðsluefni NASA við gerð útgáfunnar. Stærðir og fjarlægðir eru námundaðar. Fjarlægð frá sólu er meðaltal; brautir eru ekki fullkomnir hringir. Nákvæmur fjöldi tungla er ekki gefinn upp þar sem ný tungl finnast.</p><ul>${PLANETS.map(p => `<li><a href="${p.source}" target="_blank" rel="noopener">${p.name} – staðreyndir hjá NASA (enska) ↗</a></li>`).join('')}<li><a href="https://science.nasa.gov/solar-system/planets/" target="_blank" rel="noopener">NASA: Átta plánetur sólkerfisins ↗</a></li></ul><h2>Myndheimildir</h2><ul>${PLANETS.map(p => `<li><a href="${PLANET_IMAGES[p.id].source}" target="_blank" rel="noopener">${p.name}</a>: ${PLANET_IMAGES[p.id].credit}.</li>`).join('')}</ul><h2>Aðgengi og vistun</h2><p>Öll röðunarverkefni má leysa með því að velja eða með lyklaborði. Drag og slepp er viðbót. Tab færir milli hnappa, Enter eða bilslá velur. Engin rétt svör byggja eingöngu á að greina liti.</p><p>Árangur vistast í vafranum. Hægt er að sækja hann sem CSV eða eyða honum á kennarasvæði. Engin nöfn eru skráð og forritið sendir ekki niðurstöður á netþjón. Hýsingaraðili kann að skrá venjulegar heimsóknir á vefinn.</p><p>Forritið reynir að vista kjarnaskrár til notkunar án nets eftir fyrstu heimsókn með nettengingu á HTTPS eða localhost. Upplestur án nets fer eftir röddum tækisins. Ytri NASA-hlekkir þurfa nettengingu.</p><a href="https://github.com/IngiMar90/stjornufraedi" target="_blank" rel="noopener" class="text-link">Skoða verkefnið á GitHub ↗</a></section>`, 'sources');
 }
 
 function read() {
@@ -248,6 +251,9 @@ function setLevel(value) {
   level = value; save('stjornufraedi-level', String(value));
   view === 'teacher' ? teacher() : home(false);
 }
+main.addEventListener('error', event => {
+  if (event.target.matches?.('.planet-photo')) event.target.closest('.planet-art').classList.add('photo-failed');
+}, true);
 main.addEventListener('click', event => {
   const b = event.target.closest('button[data-action]');
   if (!b || b.disabled) return;

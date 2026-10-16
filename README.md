@@ -1,18 +1,18 @@
 # Stjörnufræði – Leiðangur um sólkerfið
 
-Gagnvirkt íslenskt kennsluforrit fyrir grunnskóla. Keyrir sem venjulegur vefur án bakenda, innskráningar eða uppsetningar pakka. Allt myndrænt efni er teiknað með CSS/SVG og engin ytri letur eða myndasöfn eru nauðsynleg.
+Gagnvirkt íslenskt kennsluforrit fyrir grunnskóla. Keyrir sem venjulegur vefur án bakenda, innskráningar eða uppsetningar pakka. Plánetumyndir frá NASA og samstarfsaðilum eru geymdar með forritinu. Stjörnubakgrunnur og kennslulíkön eru SVG/CSS. Engin ytri letur eða myndasöfn eru sótt við notkun. Sjá [myndheimildir](assets/CREDITS.md).
 
 ## Efni
 
 - **Plánetubók:** upplýsingar um átta plánetur, röð, stærð, meðal­fjarlægð frá sólu, umferðartíma og einkenni. Hlekkir á frumheimildir NASA.
 - **Raðaðu plánetunum:** velja plánetu og sæti, eða draga og sleppa. Röðun má leysa með lyklaborði og á snertiskjá.
-- **Hvaða pláneta er þetta?** Greina plánetu á einfaldri teikningu. Heitið kemur ekki fram á myndinni í spurningunni.
+- **Hvaða pláneta er þetta?** Greina plánetu á geimmynd. Heitið kemur ekki fram á myndinni í spurningunni.
 - **Geimspæjarinn:** lesskilningur og ályktun út frá vísbendingum.
 - **Plánetufjölskyldur:** bergplánetur og risaplánetur á stigi 1; bergplánetur, gasrisar og ísrisar á stigum 2–3.
 - **Stór eða smá?** Samanburður á þvermáli. Hlutföll mynda hjálpa á stigum 1–2; á stigi 3 eru myndir jafn stórar og tölurnar ráða.
 - **Dagur og nótt:** snúa líkani með sleða í undirbúningi og finna hvort merktur staður á miðbaug er í birtu eða skugga í æfingunni.
 
-Hvert verkefni hefur útskýringu → sýnidæmi → sjálfstæða æfingu. Engin tímamörk. Röng svör gefa tækifæri til að reyna aftur. Stærðir, fjarlægðir og litir eru einfölduð nema sérstaklega sé tekið fram að þvermál sé í réttum innbyrðis hlutföllum.
+Hvert verkefni hefur útskýringu → sýnidæmi → sjálfstæða æfingu. Engin tímamörk. Röng svör gefa tækifæri til að reyna aftur. Stærðir og fjarlægðir eru einfaldaðar nema sérstaklega sé tekið fram að útlínur stærðarhringja sýni rétt innbyrðis hlutföll þvermáls. Geimmyndir geta verið samsettar eða með auknum litaskilum. Stjörnuhiminninn er skrautbakgrunnur og blikkar ekki.
 
 ## Erfiðleikastig og árangur
 
